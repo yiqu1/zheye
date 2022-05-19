@@ -66,12 +66,16 @@ export default defineComponent({
     const store = useStore()
     // 接受来自ValidateForm发出的事件, 参数是boolean类型
     const onFormSubmit = (result: boolean) => {
-      console.log(result)
       if (result) {
-        // 路由跳转
-        router.push('/')
-        // 用户登录触发login事件
-        store.commit('login')
+        const payload = {
+          email: emailVal.value,
+          password: passwordVal.value
+        }
+        store.dispatch('loginAndFetch', payload).then((data) => {
+          console.log(data)
+          // 路由跳转
+          router.push('/')
+        })
       }
     }
 

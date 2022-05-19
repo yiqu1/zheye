@@ -7,9 +7,9 @@
     >
       <div class="col-3 text-center">
         <img
-          :src="column.avatar"
+          :src="column.avatar.url"
           :alt="column.title"
-          class="rounded-circle border"
+          class="rounded-circle border w-100"
         />
       </div>
       <div class="col-9">
@@ -23,9 +23,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, defineComponent, onMounted } from 'vue'
 import PostList from '@/components/PostList.vue'
+import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 import { GlobalDataProps } from '../store'
 export default defineComponent({
@@ -38,11 +38,16 @@ export default defineComponent({
     const route = useRoute()
     const store = useStore<GlobalDataProps>()
     // 找到当前id
-    const currentId = +route.params.id
+    const currentId = route.params.id
     // 找到该id的专栏, find方法只返回符合的第一项元素
-    const column = store.getters.getColumnById(currentId)
+    onMounted(() => {
+      store.dispatch('fetchColumn', currentId)
+      store.dispatch('fetchPosts', currentId)
+    })
+    const column = computed(() => store.getters.getColumnById(currentId))
     // 通过id, 找到该专栏id下的所有符合的元素, 返回一个数组
-    const list = store.getters.getPostsByCid(currentId)
+    const list = computed(() => store.getters.getPostsByCid(currentId))
+
     return {
       column,
       list

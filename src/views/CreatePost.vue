@@ -72,11 +72,11 @@ export default defineComponent({
         const { columnId } = store.state.user
         if (columnId) {
           const newPost: PostProps = {
-            id: new Date().getTime(),
+            _id: new Date().getTime(),
             title: titleVal.value,
             content: contentVal.value,
             createdAt: new Date().toLocaleString(),
-            columnId
+            column: '123'
           }
           store.commit('createPost', newPost)
           // 路由跳转
