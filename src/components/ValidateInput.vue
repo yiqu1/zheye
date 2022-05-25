@@ -35,10 +35,11 @@ const emailReg =
   /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
 // input验证规则
 interface RuleProp {
-  type: 'required' | 'email' | 'range'
+  type: 'required' | 'email' | 'range' | 'custom'
   message?: string
   min?: { message: string; length: number }
   max?: { message: string; length: number }
+  validator?: () => boolean
 }
 export type RulesProp = RuleProp[]
 // 定义input类型
@@ -91,6 +92,9 @@ export default defineComponent({
                 passed = false
                 inputRef.message = rule.max.message
               }
+              break
+            case 'custom':
+              passed = rule.validator ? rule.validator() : true
               break
             default:
               break

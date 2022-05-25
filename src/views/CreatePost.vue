@@ -69,18 +69,16 @@ export default defineComponent({
       if (result) {
         // 用户登录触发login事件
         // store.commit('login')
-        const { columnId } = store.state.user
-        if (columnId) {
+        const { column } = store.state.user
+        if (column) {
           const newPost: PostProps = {
-            _id: new Date().getTime(),
             title: titleVal.value,
             content: contentVal.value,
-            createdAt: new Date().toLocaleString(),
-            column: '123'
+            column
           }
           store.commit('createPost', newPost)
           // 路由跳转
-          router.push({ name: 'column', params: { id: columnId } })
+          router.push({ name: 'column', params: { id: column } })
         }
       }
     }

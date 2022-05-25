@@ -1,11 +1,12 @@
 import { Commit, createStore } from 'vuex'
 import axios from 'axios'
 
-interface UserProps {
+export interface UserProps {
   isLogin: boolean
-  name?: string
-  id?: number
-  columnId?: number
+  nickName?: string
+  _id?: string
+  column?: string
+  email?: string
 }
 // 定义每个专栏/post图片的类型
 interface ImageProps {
@@ -30,6 +31,10 @@ export interface PostProps {
   createdAt: string
   column: string
 }
+export interface GlobalErrorProps {
+  status: boolean
+  message?: string
+}
 // 定义actions中axios的get异步请求函数
 const getAndCommit = async (
   url: string,
@@ -52,24 +57,23 @@ const postAndCommit = async (
 }
 // 定义全局数据类型
 export interface GlobalDataProps {
-  loading: boolean
   columns: ColumnProps[]
   posts: PostProps[]
   user: UserProps
+  loading: boolean
   token: string
+  error: GlobalErrorProps
 }
 export const store = createStore<GlobalDataProps>({
   state: {
     columns: [],
     posts: [],
-    user: { isLogin: false, name: 'viking', columnId: 1 },
+    user: { isLogin: false },
     loading: false,
-    token: ''
+    token: localStorage.getItem('token') || '',
+    error: { status: false }
   },
   mutations: {
-    // login (state) {
-    //   state.user = { ...state.user, isLogin: true, name: 'viking' }
-    // },
     createPost (state, newPost) {
       state.posts.push(newPost)
     },
@@ -86,13 +90,17 @@ export const store = createStore<GlobalDataProps>({
     setLoading (state, status) {
       state.loading = status
     },
-    fetchCurrentUser (state, rawData) {
-      state.user = { isLogin: true, ...rawData.data }
-    },
     login (state, rawData) {
       const { token } = rawData.data
       state.token = token
-      axios.defaults.headers.common.Authorization = `Bearer ${token}`
+      localStorage.setItem('token', token)
+      axios.defaults.headers.common.Authrization = `Bearer ${token}`
+    },
+    fetchCurrentUser (state, rawData) {
+      state.user = { isLogin: true, ...rawData.data }
+    },
+    setError (state, e: GlobalErrorProps) {
+      state.error = e
     }
   },
   actions: {
@@ -105,11 +113,11 @@ export const store = createStore<GlobalDataProps>({
     fetchPosts ({ commit }, cid) {
       getAndCommit(`/columns/${cid}/posts`, 'fetchPosts', commit)
     },
-    fetchCurrentUser ({ commit }) {
-      getAndCommit('/user/current', 'fetchCurrentUser', commit)
-    },
     login ({ commit }, payload) {
       return postAndCommit('/user/login', 'login', commit, payload)
+    },
+    fetchCurrentUser ({ commit }) {
+      getAndCommit('/user/current', 'fetchCurrentUser', commit)
     },
     loginAndFetch ({ dispatch }, loginData) {
       return dispatch('login', loginData).then(() => {

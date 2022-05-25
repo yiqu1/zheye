@@ -11,6 +11,7 @@ axios.interceptors.request.use((config) => {
   config.params = { ...config.params, icode: '82F53E57B88D65CB' }
   // 在发送axios请求之前, 设置setLoading为true
   store.commit('setLoading', true)
+  store.commit('setError', { status: false, message: '' })
   // 其他请求，添加到 body 中
   // 如果是上传文件，添加到 FormData 中
   if (config.data instanceof FormData) {
@@ -20,10 +21,18 @@ axios.interceptors.request.use((config) => {
   }
   return config
 })
-axios.interceptors.response.use((config) => {
-  // 在axio响应返回时, 设置setLoading为false
-  store.commit('setLoading', false)
-  return config
-})
+axios.interceptors.response.use(
+  (config) => {
+    // 在axio响应返回时, 设置setLoading为false
+    store.commit('setLoading', false)
+    return config
+  },
+  (e) => {
+    const { error } = e.response.data
+    store.commit('setError', { status: true, message: error })
+    store.commit('setLoading', false)
+    return Promise.reject(error)
+  }
+)
 
 createApp(App).use(router).use(store).mount('#app')
